@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "app"
+version = "0.1.0"
+description = ""
+authors = ["Dominux <kir.gimranov@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.104.1"
+uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
+pydantic = "^2.1.1"
+aio-pika = "^9.3.1"
+pydantic-settings = "^2.1.0"
+loguru = "^0.7.2"
+pillow = "^10.1.0"
+numpy = "^1.26.0"
+ninja = "^1.11.1.1"
+diffusers = "^0.23.1"
+transformers = "^4.35.2"
+accelerate = "^0.24.1"
+omegaconf = "^2.3.0"
+gunicorn = "^21.2.0"
+aioboto3 = "^12.0.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.11.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
