@@ -3,3 +3,6 @@ up:
 
 down:
 	docker compose down
+
+run_server:
+	cd server && go run . || cd -
