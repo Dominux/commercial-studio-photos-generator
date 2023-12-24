@@ -3,15 +3,29 @@ set -e
 
 # Downloading model
 if [ -d "$MODELPATH" ]; then
-  echo "Model files already exists"
+  echo "Model files already exist"
 else
-  mkdir -p /tts_model
   echo "Downloading model"
 
   git lfs install
 
   git clone https://huggingface.co/jzli/epiCPhotoGasm-last-unicorn "$MODELPATH"
+
+  rm $MODELPATH/*.ckpt
+
   echo "Downloaded model"
+fi
+
+# Downloading embeddings
+if [ -d "/cspg_model/embeddings" ]; then
+  echo "Embeddings already exist"
+else
+  echo "Downloading embeddings"
+
+  git lfs install
+
+  git clone https://huggingface.co/embed/EasyNegative "/cspg_model/embeddings/EasyNegative"
+  echo "Downloaded embeddings"
 fi
 
 # Waiting for connection ability to rabbit

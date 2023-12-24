@@ -44,6 +44,7 @@ async def generate_for_queue():
 
             img_id = uuid.uuid4()
             path = Path(config.s3_outputs_path) / str(img_id).replace("-", "")
+            path = path.with_suffix(".png")
             await s3.put_object(path, image)
 
             msg_body = SDImagePath(path=path)
@@ -56,7 +57,7 @@ async def generate_for_queue():
             logger.error(e)
 
 
-app = FastAPI(title="Commercial studio photots generator", docs_url="/docs", lifespan=lifespan)
+app = FastAPI(title="Commercial studio photots generator", docs_url=None, lifespan=lifespan)
 
 class HealthCheckSchema(BaseModel):
     msg: str
