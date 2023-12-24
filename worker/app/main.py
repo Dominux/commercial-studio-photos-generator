@@ -19,11 +19,8 @@ from app.common.schemas import SDRequest
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if config.rabbitmq_is_used:
-        await app_runtime.init(config.rabbitmq_uri, config.modelpath)
-        asyncio.create_task(generate_for_queue())
-    else:
-        await app_runtime.init(None, config.modelpath)
+    await app_runtime.init(config.rabbitmq_uri, config.modelpath)
+    asyncio.create_task(generate_for_queue())
 
     yield
 

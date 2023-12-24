@@ -6,7 +6,6 @@ from pydantic_settings import BaseSettings
 
 
 class Config(BaseSettings):
-    rabbitmq_is_used: bool = True
     rabbitmq_host: str
     rabbitmq_port: int
     rabbitmq_user: str
