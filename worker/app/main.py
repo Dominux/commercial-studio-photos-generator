@@ -1,6 +1,7 @@
 import asyncio
 import uuid
 from pathlib import Path
+import traceback
 from contextlib import asynccontextmanager
 
 from aio_pika import Message
@@ -53,8 +54,8 @@ async def generate_for_queue():
                 msg_back, routing_key=config.rabbitmq_response_queue
             )
 
-        except Exception as e:
-            logger.error(e)
+        except Exception:
+            logger.error(traceback.format_exc())
 
 
 app = FastAPI(title="Commercial studio photots generator", docs_url=None, lifespan=lifespan)

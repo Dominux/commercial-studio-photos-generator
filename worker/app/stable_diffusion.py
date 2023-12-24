@@ -1,7 +1,6 @@
 import gc
 import io
 import random
-import traceback
 
 import numpy as np
 from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler  # type: ignore
@@ -54,19 +53,16 @@ class StableDiffusionGenerator:
         prompt = config.sd_prompt_mask.format(schema.product)
 
         with torch.no_grad():
-            try:
-                result = self._model(
-                    prompt=prompt,
-                    negative_prompt=config.sd_negative_prompt,
-                    width=schema.width,  # type: ignore
-                    height=schema.height,  # type: ignore
-                    guidance_scale=config.sd_cfg,
-                    num_inference_steps=schema.steps,
-                    num_images_per_prompt=schema.num_images,
-                    output_type="pil",
-                ).images  # type: ignore
-            except Exception:
-                traceback.print_exc()
+            result = self._model(
+                prompt=prompt,
+                negative_prompt=config.sd_negative_prompt,
+                width=schema.width,  # type: ignore
+                height=schema.height,  # type: ignore
+                guidance_scale=config.sd_cfg,
+                num_inference_steps=schema.steps,
+                num_images_per_prompt=schema.num_images,
+                output_type="pil",
+            ).images  # type: ignore
         clear_memory()
 
         buf = io.BytesIO()
