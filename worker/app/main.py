@@ -4,13 +4,11 @@ from pathlib import Path
 import traceback
 from contextlib import asynccontextmanager
 
-from aio_pika import Message
 from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel
 
 from app.common.amqp.consumer import listen_queue
-from app.common.amqp.schemas import SDImagePath
 from app.common.app_runtime import app_runtime
 from app.common.config import config
 from app.common.s3 import get_s3
@@ -44,12 +42,6 @@ async def generate_for_queue():
             path = Path(config.s3_outputs_path) / str(img_id).replace("-", "")
             path = path.with_suffix(".png")
             await s3.put_object(path, image)
-
-            msg_body = SDImagePath(path=path)
-            msg_back = Message(body=msg_body.model_dump_json().encode())
-            await channel.default_exchange.publish(
-                msg_back, routing_key=config.rabbitmq_response_queue
-            )
 
         except Exception:
             logger.error(traceback.format_exc())

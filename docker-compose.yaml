@@ -35,9 +35,11 @@ x-cspg-minio-envs: &cspg-minio-envs
   S3_BUCKET: ${MINIO_BUCKET:-cspg_service}
   S3_OUTPUTS_PATH: ${MINIO_OUTPUTS_PATH:-outputs}
 
-x-cspg-worker-envs: &cspg-service-envs
-  WORKERS: ${WORKERS}
-  PORT: ${PORT}
+x-cspg-server-envs: &cspg-server-envs
+  WORKERS: ${SERVER_WORKERS}
+
+x-cspg-worker-envs: &cspg-worker-envs
+  WORKERS: ${WORKER_WORKERS}
   API_KEY: ${API_KEY}
   MODELPATH: ${MODELPATH}
   SD_PROMPT_MASK: ${SD_PROMPT_MASK}
@@ -48,6 +50,27 @@ x-cspg-worker-envs: &cspg-service-envs
   RABBITMQ_RESPONSE_QUEUE: ${RABBITMQ_RESPONSE_QUEUE}
 
 services:
+  cspg-server:
+    container_name: cspg-server
+    image: cspg-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - ${PORT:-8000}:8000
+    tty: true
+    restart: always
+    healthcheck:
+      test: curl -f http://0.0.0.0:8000/healthcheck
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    environment:
+      <<: [*cspg-server-envs, *cspg-rabbitmq-envs]
+    logging: *formatted-logging
+    networks:
+      - cspg-network
+
   cspg-worker:
     container_name: cspg-worker
     image: cspg-worker
@@ -62,7 +85,7 @@ services:
       timeout: 5s
       retries: 10
     environment:
-      <<: [*cspg-service-envs, *cspg-rabbitmq-envs, *cspg-minio-envs]
+      <<: [*cspg-worker-envs, *cspg-rabbitmq-envs, *cspg-minio-envs]
     volumes:
       - cspg-worker-volume:/cspg_model
     logging: *formatted-logging
