@@ -21,11 +21,11 @@ class AppRuntime:
         assert self._sd_generator
         return self._sd_generator
 
-    async def init(self, rabbitmq_uri: str | None, modelpath: str, channel_numero: int = 998):
+    async def init(self, rabbitmq_uri: str | None, modelpath: str):
         if rabbitmq_uri is not None:
             await amqp_conn_manager.connect(rabbitmq_uri)
 
-            self._ch_gen = self._channels(channel_numero)
+            self._ch_gen = self._channels()
             self._ch = await anext(self._ch_gen)
 
         self._sd_generator = StableDiffusionGenerator(model_name=modelpath)
@@ -34,11 +34,11 @@ class AppRuntime:
         await amqp_conn_manager.disconnect()
 
     @staticmethod
-    async def _channels(ch_number: int | None = None):
+    async def _channels():
         assert amqp_conn_manager._conn and not amqp_conn_manager._conn.is_closed
 
         async with amqp_conn_manager._conn:
-            yield await amqp_conn_manager._conn.channel(ch_number)
+            yield await amqp_conn_manager._conn.channel()
 
 
 app_runtime = AppRuntime()

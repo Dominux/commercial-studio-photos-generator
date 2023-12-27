@@ -37,6 +37,7 @@ x-cspg-minio-envs: &cspg-minio-envs
 
 x-cspg-server-envs: &cspg-server-envs
   WORKERS: ${SERVER_WORKERS}
+  RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
 
 x-cspg-worker-envs: &cspg-worker-envs
   WORKERS: ${WORKER_WORKERS}
@@ -45,9 +46,7 @@ x-cspg-worker-envs: &cspg-worker-envs
   SD_PROMPT_MASK: ${SD_PROMPT_MASK}
   SD_NEGATIVE_PROMPT: ${SD_NEGATIVE_PROMPT}
   SD_CFG: ${SD_CFG}
-  RABBITMQ_CH_NUMBER: ${RABBITMQ_CH_NUMBER}
-  RABBITMQ_REQUEST_QUEUE: ${RABBITMQ_REQUEST_QUEUE}
-  RABBITMQ_RESPONSE_QUEUE: ${RABBITMQ_RESPONSE_QUEUE}
+  RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
 
 services:
   cspg-server:

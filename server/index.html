@@ -27,14 +27,14 @@
 
 <body>
   <div class="container z-depth-1">
-    <form>
+    <form hx-post="/generate" hx-indicator="#generate-button">
       <div class="row">
         <div class="input-field col s11">
           <input id="product" name="product" type="text" />
           <label for="product">Product</label>
         </div>
         <div class="col s1">
-          <button class="btn-floating btn-large waves-effect waves-light red" type="submit">
+          <button class="btn-floating btn-large waves-effect waves-light red" type="submit" id="generate-button">
             <i class="material-icons">edit</i>
           </button>
         </div>

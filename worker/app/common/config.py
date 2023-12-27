@@ -10,9 +10,7 @@ class Config(BaseSettings):
     rabbitmq_port: int
     rabbitmq_user: str
     rabbitmq_password: str
-    rabbitmq_ch_number: int
-    rabbitmq_request_queue: str
-    rabbitmq_response_queue: str
+    rabbitmq_queue: str
 
     @property
     def rabbitmq_uri(self) -> str:

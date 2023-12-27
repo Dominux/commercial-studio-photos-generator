@@ -33,7 +33,7 @@ async def generate_for_queue():
     sd_generator = app_runtime.sd_generator
 
     async for msg in listen_queue(
-        channel, config.rabbitmq_request_queue, SDRequest  # type: ignore
+        channel, config.rabbitmq_queue, SDRequest  # type: ignore
     ):
         try:
             image = sd_generator.txt2img(msg)
