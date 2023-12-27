@@ -113,7 +113,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-    logging: *formatted-logging
     volumes:
       - cspg-rabbitmq-volume:/var/lib/rabbitmq
     networks:
@@ -138,6 +137,24 @@ services:
       retries: 10
     volumes:
       - cspg-minio-volume:/data
-    logging: *formatted-logging
+    networks:
+      - cspg-network
+
+  cspg-centrifugo:
+    container_name: cspg-centrifugo
+    image: centrifugo/centrifugo:v5
+    volumes:
+      - ./centrifugo.config.json:/centrifugo/config.json
+    command: centrifugo -c config.json
+    restart: unless-stopped
+    healthcheck:
+      test: centrifugo -c config.json --health
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
     networks:
       - cspg-network

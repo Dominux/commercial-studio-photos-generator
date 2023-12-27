@@ -35,6 +35,9 @@ class Config(BaseSettings):
             self.s3_port,
         )
 
+    centrifugo_url: str
+    centrifugo_api_key: str
+
     api_key: str
 
     modelpath: str
