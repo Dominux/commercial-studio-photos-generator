@@ -11,6 +11,8 @@ volumes:
     name: cspg-rabbitmq-volume
   cspg-minio-volume:
     name: cspg-minio-volume
+  cspg-redis-volume:
+    name: cspg-redis-volume
 
 x-logging: &formatted-logging
   driver: json-file
@@ -35,9 +37,17 @@ x-cspg-minio-envs: &cspg-minio-envs
   S3_BUCKET: ${MINIO_BUCKET:-cspg_service}
   S3_OUTPUTS_PATH: ${MINIO_OUTPUTS_PATH:-outputs}
 
+x-cspg-redis-envs: &cspg-redis-envs
+  REDIS_HOST: ${REDIS_HOST}
+  REDIS_PORT: ${REDIS_PORT}
+  REDIS_PASS: ${REDIS_PASS}
+
+x-cspg-queues-envs: &cspg-queues-envs
+  RABBITMQ_REQUEST_QUEUE: ${RABBITMQ_REQUEST_QUEUE}
+  RABBITMQ_RESPONSE_QUEUE: ${RABBITMQ_RESPONSE_QUEUE}
+
 x-cspg-server-envs: &cspg-server-envs
   WORKERS: ${SERVER_WORKERS}
-  RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
 
 x-cspg-worker-envs: &cspg-worker-envs
   WORKERS: ${WORKER_WORKERS}
@@ -46,7 +56,6 @@ x-cspg-worker-envs: &cspg-worker-envs
   SD_PROMPT_MASK: ${SD_PROMPT_MASK}
   SD_NEGATIVE_PROMPT: ${SD_NEGATIVE_PROMPT}
   SD_CFG: ${SD_CFG}
-  RABBITMQ_QUEUE: ${RABBITMQ_QUEUE}
 
 services:
   cspg-server:
@@ -64,8 +73,17 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    depends_on:
+      - cspg-redis
     environment:
-      <<: [*cspg-server-envs, *cspg-rabbitmq-envs]
+      <<:
+        [
+          *cspg-server-envs,
+          *cspg-queues-envs,
+          *cspg-rabbitmq-envs,
+          *cspg-minio-envs,
+          *cspg-redis-envs,
+        ]
     logging: *formatted-logging
     networks:
       - cspg-network
@@ -84,7 +102,13 @@ services:
       timeout: 5s
       retries: 10
     environment:
-      <<: [*cspg-worker-envs, *cspg-rabbitmq-envs, *cspg-minio-envs]
+      <<:
+        [
+          *cspg-worker-envs,
+          *cspg-queues-envs,
+          *cspg-rabbitmq-envs,
+          *cspg-minio-envs,
+        ]
     volumes:
       - cspg-worker-volume:/cspg_model
     logging: *formatted-logging
@@ -140,21 +164,17 @@ services:
     networks:
       - cspg-network
 
-  cspg-centrifugo:
-    container_name: cspg-centrifugo
-    image: centrifugo/centrifugo:v5
-    volumes:
-      - ./centrifugo.config.json:/centrifugo/config.json
-    command: centrifugo -c config.json
-    restart: unless-stopped
+  cspg-redis:
+    container_name: cspg-redis
+    image: redis:6.2-alpine
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASS}
     healthcheck:
-      test: centrifugo -c config.json --health
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
       interval: 10s
       timeout: 5s
       retries: 10
-    ulimits:
-      nofile:
-        soft: 65535
-        hard: 65535
+    volumes:
+      - cspg-redis-volume:/data
     networks:
       - cspg-network

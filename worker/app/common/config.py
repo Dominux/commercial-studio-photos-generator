@@ -10,7 +10,8 @@ class Config(BaseSettings):
     rabbitmq_port: int
     rabbitmq_user: str
     rabbitmq_password: str
-    rabbitmq_queue: str
+    rabbitmq_request_queue: str
+    rabbitmq_response_queue: str
 
     @property
     def rabbitmq_uri(self) -> str:
@@ -34,9 +35,6 @@ class Config(BaseSettings):
             self.s3_host,
             self.s3_port,
         )
-
-    centrifugo_url: str
-    centrifugo_api_key: str
 
     api_key: str
 

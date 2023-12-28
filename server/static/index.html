@@ -27,7 +27,7 @@
 
 <body>
   <div class="container z-depth-1">
-    <form hx-post="/generate" hx-indicator="#generate-button">
+    <form hx-post="/generate" hx-target="#content" hx-indicator="#generate-button">
       <div class="row">
         <div class="input-field col s11">
           <input id="product" name="product" type="text" />
@@ -41,7 +41,7 @@
       </div>
     </form>
 
-    <div class="row"></div>
+    <div id="content" class="row"></div>
   </div>
 
   <!-- Compiled and minified JavaScript -->

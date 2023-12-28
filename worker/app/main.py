@@ -7,13 +7,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from loguru import logger
 from pydantic import BaseModel
+from aio_pika import Message
 
 from app.common.amqp.consumer import listen_queue
 from app.common.app_runtime import app_runtime
 from app.common.config import config
 from app.common.s3 import get_s3
-from app.common.schemas import SDRequest
-from app.common.centrifugo_client import CentrifugoClient
+from app.common.schemas import SDRequest, SDResponse
 
 
 @asynccontextmanager
@@ -30,23 +30,24 @@ async def generate_for_queue():
     s3_gen = get_s3()
     s3 = await anext(s3_gen)
 
-    centrifugo_client = CentrifugoClient(config.centrifugo_url, config.centrifugo_api_key)
-
     channel = app_runtime.channel
     sd_generator = app_runtime.sd_generator
 
     async for msg in listen_queue(
-        channel, config.rabbitmq_queue, SDRequest  # type: ignore
+        channel, config.rabbitmq_request_queue, SDRequest  # type: ignore
     ):
         try:
             image = sd_generator.txt2img(msg)
 
-            img_id = uuid.uuid4()
-            path = Path(config.s3_outputs_path) / str(img_id).replace("-", "")
+            path = Path(config.s3_outputs_path) / str(msg.id).replace("-", "")
             path = path.with_suffix(".png")
             await s3.put_object(path, image)
 
-            await centrifugo_client.publish(str(img_id), {"stage": "done"})
+            msg_back = SDResponse(id=msg.id, status="done")
+            msg_back = Message(body=msg_back.model_dump_json().encode())
+            await channel.default_exchange.publish(
+                msg_back, routing_key=config.rabbitmq_response_queue
+            )
 
         except Exception:
             logger.error(traceback.format_exc())

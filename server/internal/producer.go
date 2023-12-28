@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"context"
@@ -9,37 +9,32 @@ import (
 )
 
 type Producer struct {
-	conn      *amqp.Connection
-	ch        *amqp.Channel
-	queueName string
+	conn  *amqp.Connection
+	ch    *amqp.Channel
+	queue amqp.Queue
 }
 
 const MAX_RETRIES = 5
 
 func NewProducer(dsn string, queueName string) *Producer {
 	// opening connection
-	var (
-		conn *amqp.Connection
-		err  error
-	)
-	for i := 0; i < MAX_RETRIES; i++ {
-		conn, err = amqp.Dial(dsn)
-		if err == nil {
-			break
-		}
-
-		time.Sleep(3 * time.Second)
-
-		if i+1 == MAX_RETRIES {
-			failOnError(err, "Failed to connect to RabbitMQ")
-		}
-	}
+	conn := connectToRabbitMQ(dsn)
 
 	// opening channel
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
 
-	return &Producer{conn, ch, queueName}
+	queue, err := ch.QueueDeclare(
+		queueName, // name
+		false,     // durable
+		true,      // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		nil,       // arguments
+	)
+	failOnError(err, "Failed to declare a queue")
+
+	return &Producer{conn, ch, queue}
 }
 
 func (p *Producer) Send(msg []byte) error {
@@ -47,10 +42,10 @@ func (p *Producer) Send(msg []byte) error {
 	defer cancel()
 
 	err := p.ch.PublishWithContext(ctx,
-		"",          // exchange
-		p.queueName, // routing key
-		false,       // mandatory
-		false,       // immediate
+		"",           // exchange
+		p.queue.Name, // routing key
+		false,        // mandatory
+		false,        // immediate
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        msg,
@@ -59,7 +54,7 @@ func (p *Producer) Send(msg []byte) error {
 		return err
 	}
 
-	log.Printf(" [x] Sent %s\n", msg)
+	log.Printf(" [x] sent %s\n", msg)
 
 	return nil
 }
