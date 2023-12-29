@@ -104,13 +104,8 @@ class CustomLogger:
 
         lognames = [
             "asyncio",
-            "aiogram.dispatcher",
-            "aiogram.event",
             "aio_pika",
-            "deepl",
             "fastapi",
-            "passlib",
-            "sqlalchemy.engine.Engine",
             "uvicorn",
             "uvicorn.access",
             "uvicorn.error",

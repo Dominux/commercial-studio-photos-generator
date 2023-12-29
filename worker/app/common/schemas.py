@@ -12,6 +12,7 @@ class SDRequest(BaseModel):
     steps: int | None = 20
     num_images: int | None = 1
 
+
 class SDResponse(BaseModel):
     id: UUID
     status: str

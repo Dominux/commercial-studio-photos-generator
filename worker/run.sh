@@ -37,7 +37,7 @@ python /startup/s3.py
 
 # Running app
 gunicorn app.main:app \
-  -w "${WORKERS:-4}" \
+  -w "${WORKERS:-1}" \
   -k uvicorn.workers.UvicornWorker \
   -b 0.0.0.0:5000 \
   --timeout 600

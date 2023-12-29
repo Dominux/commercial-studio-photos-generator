@@ -24,7 +24,10 @@ class StableDiffusionGenerator:
 
     def _init_model(self, model_name):
         model = StableDiffusionPipeline.from_pretrained(
-            model_name, torch_dtype=torch.float16, use_safetensors=True
+            model_name, 
+            torch_dtype=torch.float16, 
+            use_safetensors=True, 
+            safety_checker=None,
         )
         model = model.to(device)
         model.enable_freeu(s1=0.9, s2=0.2, b1=1.2, b2=1.4)

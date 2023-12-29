@@ -1,7 +1,6 @@
 import os
 import asyncio
 
-import aioboto3
 from aiobotocore.session import get_session
 from loguru import logger
 
@@ -32,25 +31,8 @@ async def wait_for_connection(interval: int):
             logger.info("Attempt to establish connection with s3")
 
 
-async def create_bucket():
-    session = aioboto3.Session()
-    async with session.resource(
-        "s3",
-        endpoint_url=URL,
-        aws_secret_access_key=secret,
-        aws_access_key_id=key,
-    ) as s3:
-        try:
-            await s3.create_bucket(Bucket=BUCKET)
-        except s3.meta.client.exceptions.BucketAlreadyOwnedByYou:
-            logger.info("Bucket already exists")
-        else:
-            logger.info("Created bucket")
-
-
 async def main(interval: int):
     await wait_for_connection(interval)
-    await create_bucket()
 
 
 if __name__ == "__main__":

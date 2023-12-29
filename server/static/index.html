@@ -22,12 +22,18 @@
       padding: 1rem;
       border-radius: 4px;
     }
+
+    .content {
+      width: 100%;
+      height: auto;
+      padding: 1rem;
+    }
   </style>
 </head>
 
 <body>
   <div class="container z-depth-1">
-    <form hx-post="/generate" hx-target="#content" hx-indicator="#generate-button">
+    <form id="form" hx-post="/generate" hx-target="#content" hx-indicator="#generate-button">
       <div class="row">
         <div class="input-field col s11">
           <input id="product" name="product" type="text" />
@@ -49,7 +55,10 @@
 
   <script>
     // fancy focusing instead of autofocus sht
-    document.getElementById("product").focus()
+    const productRef = document.getElementById("product")
+    productRef.focus()
+
+    document.getElementById("form").addEventListener("submit", e => productRef.blur())
   </script>
 </body>
 

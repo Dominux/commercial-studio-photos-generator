@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -14,14 +17,26 @@ import (
 )
 
 func main() {
+	var resultsExpire time.Duration
+	var err error
+	{
+		envVar := os.Getenv("RESULTS_EXPIRATION_IN_MINUTES")
+		resultsExpirationInMinutes, err := strconv.Atoi(envVar)
+		if err != nil {
+			log.Panicf("failed casting `%s` to int", envVar)
+		}
+
+		resultsExpire = time.Duration(resultsExpirationInMinutes) * time.Minute
+	}
+
 	var amqp_dsn string
 	{
-		amqp_host := os.Getenv("RABBITMQ_HOST")
-		amqp_port := os.Getenv("RABBITMQ_PORT")
-		amqp_user := os.Getenv("RABBITMQ_USER")
-		amqp_pass := os.Getenv("RABBITMQ_PASSWORD")
+		host := os.Getenv("RABBITMQ_HOST")
+		port := os.Getenv("RABBITMQ_PORT")
+		user := os.Getenv("RABBITMQ_USER")
+		pass := os.Getenv("RABBITMQ_PASSWORD")
 
-		amqp_dsn = fmt.Sprintf("amqp://%s:%s@%s:%s/", amqp_user, amqp_pass, amqp_host, amqp_port)
+		amqp_dsn = fmt.Sprintf("amqp://%s:%s@%s:%s/", user, pass, host, port)
 	}
 
 	// setting redis client
@@ -40,11 +55,10 @@ func main() {
 	}
 
 	results := make(chan []byte)
-	go internal.SaveResults(results, redisClient)
+	go internal.SaveResults(results, redisClient, resultsExpire)
 
 	// initing minio client
 	var minioClient *minio.Client
-	var err error
 	{
 		host := os.Getenv("S3_HOST")
 		port := os.Getenv("S3_PORT")
@@ -61,6 +75,11 @@ func main() {
 	}
 	minioBucket := os.Getenv("S3_BUCKET")
 	minioResultsPath := os.Getenv("S3_OUTPUTS_PATH")
+	{
+		ctx := context.Background()
+		internal.CreateMinioBucket(ctx, minioBucket, minioClient)
+		internal.SetMinioExpiration(ctx, minioBucket, resultsExpire, minioClient)
+	}
 
 	// starting consumer
 	responseQName := os.Getenv("RABBITMQ_RESPONSE_QUEUE")

@@ -23,6 +23,3 @@ class S3:
 
     async def put_object(self, path: Path, data: bytes):
         await self._client.put_object(Bucket=config.s3_bucket, Key=str(path), Body=data)  # type: ignore
-
-    async def get_object(self, path: Path) -> dict:
-        return await self._client.get_object(Bucket=config.s3_bucket, Key=str(path))  # type: ignore

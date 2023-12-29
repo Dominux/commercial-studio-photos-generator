@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
@@ -41,7 +42,7 @@ func RunGenerating(product string, p *Producer) (uuid.UUID, error) {
 	return id, nil
 }
 
-func SaveResults(results chan []byte, redisClient *redis.Client) {
+func SaveResults(results chan []byte, redisClient *redis.Client, resultsExpire time.Duration) {
 	for msg := range results {
 		var result GenerateResultSchema
 		if err := json.Unmarshal(msg, &result); err != nil {
@@ -51,7 +52,7 @@ func SaveResults(results chan []byte, redisClient *redis.Client) {
 
 		ctx := context.Background()
 
-		if err := redisClient.Set(ctx, result.Id.String(), nil, 0).Err(); err != nil {
+		if err := redisClient.Set(ctx, result.Id.String(), nil, resultsExpire).Err(); err != nil {
 			fmt.Printf("error on saving into redis: %s\n", err)
 		}
 	}
@@ -75,8 +76,6 @@ func GetResult(ctx context.Context, rawId string, minioClient *minio.Client, min
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO: add removing from redis and minio
 
 	return buf, nil
 }

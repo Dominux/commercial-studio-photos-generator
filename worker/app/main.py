@@ -1,5 +1,4 @@
 import asyncio
-import uuid
 from pathlib import Path
 import traceback
 from contextlib import asynccontextmanager
@@ -61,10 +60,4 @@ class HealthCheckSchema(BaseModel):
 
 @app.get("/healthcheck", response_model=HealthCheckSchema)
 async def healthcheck():
-    """
-    Healthcheck endpoint.
-
-    ### Output
-    * {"msg": "ok"}
-    """
     return {"msg": "ok"}

@@ -1,9 +1,5 @@
 version: '3.9'
 
-networks:
-  cspg-network:
-    name: cspg-network
-
 volumes:
   cspg-worker-volume:
     name: cspg-worker-volume
@@ -47,7 +43,7 @@ x-cspg-queues-envs: &cspg-queues-envs
   RABBITMQ_RESPONSE_QUEUE: ${RABBITMQ_RESPONSE_QUEUE}
 
 x-cspg-server-envs: &cspg-server-envs
-  WORKERS: ${SERVER_WORKERS}
+  RESULTS_EXPIRATION_IN_MINUTES: ${RESULTS_EXPIRATION_IN_MINUTES}
 
 x-cspg-worker-envs: &cspg-worker-envs
   WORKERS: ${WORKER_WORKERS}
@@ -74,6 +70,9 @@ services:
       timeout: 5s
       retries: 10
     depends_on:
+      - cspg-worker
+      - cspg-rabbitmq
+      - cspg-minio
       - cspg-redis
     environment:
       <<:
@@ -85,8 +84,6 @@ services:
           *cspg-redis-envs,
         ]
     logging: *formatted-logging
-    networks:
-      - cspg-network
 
   cspg-worker:
     container_name: cspg-worker
@@ -119,8 +116,6 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-    networks:
-      - cspg-network
 
   cspg-rabbitmq:
     container_name: cspg_rabbitmq
@@ -139,8 +134,6 @@ services:
       retries: 10
     volumes:
       - cspg-rabbitmq-volume:/var/lib/rabbitmq
-    networks:
-      - cspg-network
 
   cspg-minio:
     container_name: cspg-minio
@@ -161,8 +154,6 @@ services:
       retries: 10
     volumes:
       - cspg-minio-volume:/data
-    networks:
-      - cspg-network
 
   cspg-redis:
     container_name: cspg-redis
@@ -176,5 +167,3 @@ services:
       retries: 10
     volumes:
       - cspg-redis-volume:/data
-    networks:
-      - cspg-network
