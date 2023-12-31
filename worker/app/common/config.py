@@ -36,8 +36,6 @@ class Config(BaseSettings):
             self.s3_port,
         )
 
-    api_key: str
-
     modelpath: str
     sd_prompt_mask: str
     sd_negative_prompt: str

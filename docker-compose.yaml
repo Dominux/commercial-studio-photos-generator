@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 volumes:
   cspg-worker-volume:
@@ -13,11 +13,11 @@ volumes:
 x-logging: &formatted-logging
   driver: json-file
   options:
-    tag: '{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}'
-    max-size: '10m'
-    max-file: '3'
-    mode: 'non-blocking'
-    max-buffer-size: '4m'
+    tag: "{{.ImageName}}|{{.Name}}|{{.ImageFullID}}|{{.FullID}}"
+    max-size: "10m"
+    max-file: "3"
+    mode: "non-blocking"
+    max-buffer-size: "4m"
 
 x-cspg-rabbitmq-envs: &cspg-rabbitmq-envs
   RABBITMQ_HOST: ${RABBITMQ_HOST:-0.0.0.0}
@@ -47,7 +47,6 @@ x-cspg-server-envs: &cspg-server-envs
 
 x-cspg-worker-envs: &cspg-worker-envs
   WORKERS: ${WORKER_WORKERS}
-  API_KEY: ${API_KEY}
   MODELPATH: ${MODELPATH}
   SD_PROMPT_MASK: ${SD_PROMPT_MASK}
   SD_NEGATIVE_PROMPT: ${SD_NEGATIVE_PROMPT}
@@ -121,7 +120,7 @@ services:
     container_name: cspg_rabbitmq
     image: rabbitmq:3.12.1-management
     ports:
-      - '${RABBITMQ_UI_EXPOSED_PORT:-15672}:15672'
+      - "${RABBITMQ_UI_EXPOSED_PORT:-15672}:15672"
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
@@ -140,13 +139,13 @@ services:
     image: minio/minio:latest
     entrypoint: minio server --address ":9000" --console-address ":9001" /data
     ports:
-      - '${MINIO_UI_EXPOSED_PORT:-9001}:9001'
+      - "${MINIO_UI_EXPOSED_PORT:-9001}:9001"
     restart: unless-stopped
     environment:
       MINIO_ROOT_USER: ${MINIO_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
-      MINIO_PROMETHEUS_AUTH_TYPE: 'public'
-      MINIO_UPDATE: 'off'
+      MINIO_PROMETHEUS_AUTH_TYPE: "public"
+      MINIO_UPDATE: "off"
     healthcheck:
       test: curl -f http://0.0.0.0:9000/minio/health/live
       interval: 10s
@@ -161,7 +160,7 @@ services:
     restart: always
     command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASS}
     healthcheck:
-      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 10s
       timeout: 5s
       retries: 10
