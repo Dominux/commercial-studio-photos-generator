@@ -101,6 +101,11 @@ So, as I said before, in this case increasing perfomance should be performed by 
   - [MinIO](https://min.io/) - an object storage. I use it for centralized storing generation results
   - [Redis](https://redis.io/) - an in-memory database. I use it for storing results IDs for the server to check if the result is already done
 
+- Model
+  * [epiCPhotoGazm lastUnicorn](https://huggingface.co/jzli/epiCPhotoGasm-last-unicorn) - realistic Stable Diffusion checkpoint
+  * [easynegative](https://huggingface.co/embed/EasyNegative) - simple Stable Diffusion negative embedding
+  * [DPM++ 2M Karras](https://huggingface.co/docs/diffusers/api/schedulers/overview) - Stable Diffusion scheduler for generating better result
+
 ### Client-server communication
 
 I would use [websockets](https://en.wikipedia.org/wiki/WebSocket) or [SSE](https://en.wikipedia.org/wiki/Server-sent_events) for that, but I used a good ol' polling (even not a long polling) and here's why:
