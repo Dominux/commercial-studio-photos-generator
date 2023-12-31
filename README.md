@@ -2,6 +2,8 @@
 
 Simple yet Production Ready MLOps example of using any generating model
 
+https://github.com/Dominux/commercial-studio-photos-generator/assets/55978340/31ca8f52-8830-4eb2-b079-d29cb77fa546
+
 ## Introduction
 
 Nowadays, with generational neural networks increasingly becoming a significant part of our life, many devs got to intergrate them into production ready systems, no matter whether the system is a big entreprise or just a wrapper for such a model with some web, mobile or bot user interface. Programmatic madia creating, such as generating social media content like posts, videos, music and etc isn't already some new thing for now, but with neural networks becoming so popular and moreover affordable for ordinar people, makes such models so desirable to use.
@@ -62,6 +64,8 @@ docker logs -f cspg-worker
 
 It uses [Web-Queue-Worker](https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/web-queue-worker) pattern by obvious reasons. The whole architecture is presented below:
 
+![image](https://github.com/Dominux/commercial-studio-photos-generator/assets/55978340/c5d5f601-c609-480e-b345-6608aecfa86c)
+
 With scalability being extremelly necessery in case of such applications, this architecture brings ability to simply scale:
 
 - inner traffic by increasing Server workers amount
@@ -78,12 +82,13 @@ As was said before, to speed up generation process, you need to examine the GPU 
 
 To demonstrate how the perfomance stays the same with increasing workers amount, I performed tests on running the same process of parallel 10 requests on generating the same product. Even though workers were really taking multiple messages at the same time, their speed was multiply slowed down. So here's the chart of running this test for 1-4 workers (since I got only 16GB RAM and 12GB of VRAM on my home machine and renting VDS even with same GPU is so expensive):
 
+![image](https://github.com/Dominux/commercial-studio-photos-generator/assets/55978340/b4d588ee-a712-4286-a9b0-1158b5e5bd61)
+
 So, as I said before, in this case increasing perfomance should be performed by increasing amount of GPUs. [Direct RabbitMQ Exchange](https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchange-direct) I use provides ability to fan out messages from a queue to multiple consumers so it allows such a way of generation acceleration.
 
 ### Tech stack
 
 - Frontend
-
   - [HTMX](https://htmx.org/) - I gave it a try and it perfoms well, especially in such a simple cases
   - [Materialize](https://materializecss.com/) - CSS library cause I try to avoid using JS with HTMX
 
